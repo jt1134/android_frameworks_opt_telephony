@@ -237,7 +237,7 @@ public class SamsungExynos3RIL extends RIL implements CommandsInterface {
             case RIL_REQUEST_CDMA_SUBSCRIPTION: ret =  responseCdmaSubscription(p); break;
             case RIL_REQUEST_CDMA_WRITE_SMS_TO_RUIM: ret =  responseInts(p); break;
             case RIL_REQUEST_CDMA_DELETE_SMS_ON_RUIM: ret =  responseVoid(p); break;
-            case RIL_REQUEST_DEVICE_IDENTITY: ret =  responseStrings(p); break;
+            case RIL_REQUEST_DEVICE_IDENTITY: ret =  responseDeviceIdentity(p); break;
             case RIL_REQUEST_GET_SMSC_ADDRESS: ret = responseString(p); break;
             case RIL_REQUEST_SET_SMSC_ADDRESS: ret = responseVoid(p); break;
             case RIL_REQUEST_EXIT_EMERGENCY_CALLBACK_MODE: ret = responseVoid(p); break;
@@ -774,6 +774,22 @@ public class SamsungExynos3RIL extends RIL implements CommandsInterface {
             String prlVersion = SystemProperties.get("ril.prl_ver_1").split(":")[1];
             response          = new String[] {response[0], response[1], response[2],
                                               response[3], prlVersion};
+        }
+
+        return response;
+    }
+
+    protected Object
+    responseDeviceIdentity(Parcel p) {
+        String response[] = (String[])responseStrings(p);
+
+        if (mIsSamsungCdma && response.length == 4) {
+            // add hex MEID from properties.
+            String meid = SystemProperties.get("ro.ril.MEID", null);
+            if (meid != null) {
+                response = new String[] {response[0], response[1],
+                                         response[2], meid};
+            }
         }
 
         return response;
